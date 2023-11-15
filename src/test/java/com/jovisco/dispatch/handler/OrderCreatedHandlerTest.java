@@ -1,5 +1,6 @@
 package com.jovisco.dispatch.handler;
 
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -25,8 +26,17 @@ public class OrderCreatedHandlerTest {
     }
 
     @Test
-    void listen() {
+    void listen_Success() throws Exception {
         OrderCreated testEvent = TestEventData.buildOrderCreatedEvent(randomUUID(), randomUUID().toString());
+        handler.listen(testEvent);
+        verify(dispatchServiceMock, times(1)).process(testEvent);
+    }
+
+    @Test
+    void listen_Fail() throws Exception {
+        OrderCreated testEvent = TestEventData.buildOrderCreatedEvent(randomUUID(), randomUUID().toString());
+        doThrow(new RuntimeException("Service failed")).when(dispatchServiceMock).process(testEvent);
+        
         handler.listen(testEvent);
         verify(dispatchServiceMock, times(1)).process(testEvent);
     }
